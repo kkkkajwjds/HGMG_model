@@ -14,10 +14,8 @@ def parse_multiple_metagraphs(filepath: str) -> List[Tuple[List[int], List[Tuple
 
     for line in lines:
         if line.startswith('#'):
-            # 保存上一个元图
             if in_metagraph and current_node_types is not None:
-                metagraphs.append((current_node_types, current_edge_pairs))
-            # 开始新元图
+
             in_metagraph = True
             current_node_types = None
             current_edge_pairs = []
@@ -33,14 +31,11 @@ def parse_multiple_metagraphs(filepath: str) -> List[Tuple[List[int], List[Tuple
             for i in range(0, len(parts), 2):
                 u, v = parts[i], parts[i + 1]
                 current_edge_pairs.append((u, v))
-        # 忽略 S, C, F 行，仅用于完整性
-        # 其他行可忽略
 
-    # 添加最后一个元图
     if in_metagraph and current_node_types is not None:
         metagraphs.append((current_node_types, current_edge_pairs))
 
-    # 将有向边转换为无序的节点类型对
+
     result = []
     for node_types, edge_pairs in metagraphs:
         type_of_node = {idx: node_types[idx] for idx in range(len(node_types))}
@@ -55,9 +50,6 @@ def parse_multiple_metagraphs(filepath: str) -> List[Tuple[List[int], List[Tuple
     return result
 
 
-# ------------------------------------------------------------
-# data. 从所有元图中推断全局的节点类型集合和边类型集合
-# ------------------------------------------------------------
 def infer_type_universes(all_node_types_list: List[List[int]],
                          all_edge_pairs_list: List[List[Tuple[int, int]]]):
     node_set: Set[int] = set()
@@ -71,9 +63,7 @@ def infer_type_universes(all_node_types_list: List[List[int]],
     return node_type_order, edge_type_order
 
 
-# ------------------------------------------------------------
-# 3. 转换为分布向量
-# ------------------------------------------------------------
+
 def to_distribution(node_types: List[int],
                     edge_pairs: List[Tuple[int, int]],
                     node_type_order: List[int],
@@ -131,9 +121,7 @@ def select_diverse_metagraphs(distributions: List[Tuple[np.ndarray, np.ndarray]]
     return selected
 
 
-# ------------------------------------------------------------
-# 5. 主函数：处理一个文件（内含多个元图）
-# ------------------------------------------------------------
+
 def select_diverse_from_file(filepath: str, k1: int, output=True):
     # 解析所有元图
     metagraphs_raw = parse_multiple_metagraphs(filepath)
@@ -143,7 +131,6 @@ def select_diverse_from_file(filepath: str, k1: int, output=True):
     all_node_types = [m[0] for m in metagraphs_raw]
     all_edge_pairs = [m[1] for m in metagraphs_raw]
 
-    # 推断类型顺序
     node_order, edge_order = infer_type_universes(all_node_types, all_edge_pairs)
 
     distributions = []
@@ -151,7 +138,6 @@ def select_diverse_from_file(filepath: str, k1: int, output=True):
         dist = to_distribution(node_types, edge_pairs, node_order, edge_order)
         distributions.append(dist)
 
-    # 选择多样化的元图
     selected_indices = select_diverse_metagraphs(distributions, k1)
 
     if output:

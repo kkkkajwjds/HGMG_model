@@ -19,48 +19,7 @@ def accuracy(output, labels):
     correct = correct.sum()
     return correct / len(labels)
 
-
-def train_val_test_split_Yelp(labels):
-    class_counts = {}
-    for label in labels:
-        if label in class_counts:
-            class_counts[label] += 1
-        else:
-            class_counts[label] = 1
-    train_ratio = 0.4
-    val_ratio = 0.1
-    train_samples = {}
-    val_samples = {}
-    test_samples = {}
-    for label, count in class_counts.items():
-        train_count = int(count * train_ratio)
-        val_count = int(count * val_ratio)
-        test_count = count - train_count - val_count
-
-        # 随机打乱索引，以便随机选择样本
-        indices = list(range(count))
-        random.shuffle(indices)
-
-        # 分配样本到各个数据集
-        train_samples[label] = [indices.pop() for _ in range(train_count)]
-        val_samples[label] = [indices.pop() for _ in range(val_count)]
-        test_samples[label] = [indices.pop() for _ in range(test_count)]
-    train_idx = train_samples['0'] + train_samples['1'] + train_samples['data']
-    val_idx = val_samples['0'] + val_samples['1'] + val_samples['data']
-    test_idx = test_samples['0'] + test_samples['1'] + test_samples['data']
-    print(len(train_idx))
-    print(len(val_idx))
-    print(len(test_idx))
-    train_idx = random.sample(train_idx, len(train_idx))
-    val_idx = random.sample(val_idx, len(val_idx))
-    test_idx = random.sample(test_idx, len(test_idx))
-    test_idx = torch.LongTensor(test_idx)
-    val_idx = torch.LongTensor(val_idx)
-    train_idx = torch.LongTensor(train_idx)
-    return train_idx,val_idx,test_idx
-
-
-def train_val_test_split_IMDB(labels):
+def train_val_test_split(labels):
     class_counts = {}
     for label in labels:
         if label in class_counts:
@@ -96,43 +55,6 @@ def train_val_test_split_IMDB(labels):
     train_idx = torch.LongTensor(train_idx)
     return train_idx,val_idx,test_idx
 
-def train_val_test_split_dblp(labels):
-    class_counts = {}
-    for label in labels:
-        if label in class_counts:
-            class_counts[label] += 1
-        else:
-            class_counts[label] = 1
-    train_ratio = 0.6
-    val_ratio = 0.1
-    train_samples = {}
-    val_samples = {}
-    test_samples = {}
-    for label, count in class_counts.items():
-        train_count = int(count * train_ratio)
-        val_count = int(count * val_ratio)
-        test_count = count - train_count - val_count
-
-        # 随机打乱索引，以便随机选择样本
-        indices = list(range(count))
-        random.shuffle(indices)
-
-        # 分配样本到各个数据集
-        train_samples[label] = [indices.pop() for _ in range(train_count)]
-        val_samples[label] = [indices.pop() for _ in range(val_count)]
-        test_samples[label] = [indices.pop() for _ in range(test_count)]
-    train_idx = train_samples['0'] + train_samples['1'] + train_samples['2']+train_samples['3']
-    val_idx = val_samples['0'] + val_samples['1'] + val_samples['2']+val_samples['3']
-    test_idx = test_samples['0'] + test_samples['1'] + test_samples['2']+test_samples['3']
-    train_idx = random.sample(train_idx, len(train_idx))
-    val_idx = random.sample(val_idx, len(val_idx))
-    test_idx = random.sample(test_idx, len(test_idx))
-    test_idx = torch.LongTensor(test_idx)
-    val_idx = torch.LongTensor(val_idx)
-    train_idx = torch.LongTensor(train_idx)
-    return train_idx,val_idx,test_idx
-
-
 def kmeans_test(X, y, n_clusters):
     nmi_list = []
     ari_list = []
@@ -157,7 +79,6 @@ def build_global_split_adj(
     sparse: bool = True
 ) -> Tuple[Optional[torch.Tensor], Optional[torch.Tensor]]:
 
-    # 解析固定边索引（基于局部索引 0,1,data,3）
     parts = edge_str.strip().split()
     if parts and parts[0].upper() == 'E':
         parts = parts[1:]
@@ -166,7 +87,6 @@ def build_global_split_adj(
     for i in range(0, len(idx_list), 2):
         local_edges.append((idx_list[i], idx_list[i+1]))
     if not directed:
-        # 无向图添加反向边
         local_edges = local_edges + [(v, u) for (u, v) in local_edges]
 
     # 读取所有行，收集全局节点和边

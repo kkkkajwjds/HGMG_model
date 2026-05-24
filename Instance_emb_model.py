@@ -5,9 +5,7 @@ from itertools import combinations
 
 
 class InstanceEncoder(nn.Module):
-    """
-    Encode one instance (list of node embeddings) → vector
-    """
+
 
     def __init__(self, embed_dim):
         super().__init__()
@@ -24,9 +22,7 @@ class InstanceEncoder(nn.Module):
 
 
 class InstanceAttention(nn.Module):
-    """
-    attention over instances conditioned on target
-    """
+
 
     def __init__(self, embed_dim):
         super().__init__()

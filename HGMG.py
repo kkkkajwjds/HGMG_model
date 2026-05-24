@@ -48,9 +48,6 @@ class HGMGModel(nn.Module):
         )
         self.classifier = nn.Linear(hidden_dim, num_classes)
 
-    # -------------------------------------------------
-    # meta encoding
-    # -------------------------------------------------
     def _encode_meta_graphs(
         self,
         adj_t_list,
@@ -86,7 +83,4 @@ class HGMGModel(nn.Module):
         X_sim = self.sim_gnn(X_t_list, A_sim)
         F = self.fusion(torch.cat([X_mg, X_sim], dim=-1))
         logits = self.classifier(F)
-
-        print("logits type:", type(logits))
-        print("logits.shape:", logits.shape)
         return {logits, F,X_mg,Z,alpha}

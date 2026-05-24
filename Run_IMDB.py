@@ -14,7 +14,7 @@ from sklearn.metrics import f1_score
 
 from utils import (
     accuracy,
-    train_val_test_split_IMDB,
+    train_val_test_split,
     kmeans_test,
     build_global_split_adj,
 load_instances,build_instances_dict,build_instance_batch
@@ -79,7 +79,7 @@ core_node_adj, other_node_adj = build_global_split_adj(
 print(core_node_adj.shape,other_node_adj.shape)
 
 
-idx_train, idx_val, idx_test = train_val_test_split_IMDB(movie_id)
+idx_train, idx_val, idx_test = train_val_test_split(movie_id)
 
 # ============================================================
 # Build instances_batch + target_nodes
